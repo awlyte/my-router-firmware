@@ -16,24 +16,22 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y build-essential libncurses-dev file rsync bc git wget cpio unzip
 
-    - name: Download Buildroot
+    - name: Download Buildroot via Tarball
       run: |
-        # Switched to the HTTPS GitHub mirror to bypass protocol blocks
-        git clone --depth=1 https://github.com
+        wget https://buildroot.org
+        tar -xf buildroot-2024.02.10.tar.xz
+        mv buildroot-2024.02.10 buildroot
         
     - name: Configure and Compile Custom OS
       run: |
         cd buildroot
-        # Load a solid, pre-built Cortex-A9 profile to ensure clean building
         make qemu_arm_vexpress_defconfig
         
-        # Inject our custom AI features safely into the configuration
         echo "BR2_PACKAGE_PYTHON3=y" >> .config
         echo "BR2_PACKAGE_PYTHON_REQUESTS=y" >> .config
         echo "BR2_PACKAGE_CURL=y" >> .config
         echo "BR2_PACKAGE_OPENSSL=y" >> .config
         
-        # Force build system to accept changes and compile
         make olddefconfig
         make -j$(nproc)
 
