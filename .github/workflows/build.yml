@@ -18,7 +18,8 @@ jobs:
 
     - name: Download Buildroot
       run: |
-        git clone --depth=1 git://buildroot.net/buildroot
+        # Switched to the HTTPS GitHub mirror to bypass protocol blocks
+        git clone --depth=1 https://github.com
         
     - name: Configure and Compile Custom OS
       run: |
