@@ -1,0 +1,45 @@
+name: Build Router Firmware
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Install Compiler Tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libncurses-dev file rsync bc git wget cpio unzip
+
+    - name: Download Buildroot
+      run: |
+        git clone --depth=1 git://buildroot.net/buildroot
+        
+    - name: Configure and Compile Custom OS
+      run: |
+        cd buildroot
+        # 1. target hardware configuration
+        echo "BR2_arm=y" > .config
+        echo "BR2_cortex_a9=y" >> .config
+        echo "BR2_ARM_EABIHF=y" >> .config
+        
+        # 2. Add Python and Network AI support utilities
+        echo "BR2_PACKAGE_PYTHON3=y" >> .config
+        echo "BR2_PACKAGE_PYTHON_REQUESTS=y" >> .config
+        echo "BR2_PACKAGE_CURL=y" >> .config
+        echo "BR2_PACKAGE_OPENSSL=y" >> .config
+        
+        # 3. Process configurations and build
+        make defconfig
+        make -j$(nproc)
+
+    - name: Upload Finished Firmware
+      uses: actions/artifacts@v4
+      with:
+        name: custom-firmware
+        path: buildroot/output/images/
