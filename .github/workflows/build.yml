@@ -23,19 +23,17 @@ jobs:
     - name: Configure and Compile Custom OS
       run: |
         cd buildroot
-        # 1. target hardware configuration
-        echo "BR2_arm=y" > .config
-        echo "BR2_cortex_a9=y" >> .config
-        echo "BR2_ARM_EABIHF=y" >> .config
+        # Load a solid, pre-built Cortex-A9 profile to ensure clean building
+        make qemu_arm_vexpress_defconfig
         
-        # 2. Add Python and Network AI support utilities
+        # Inject our custom AI features safely into the configuration
         echo "BR2_PACKAGE_PYTHON3=y" >> .config
         echo "BR2_PACKAGE_PYTHON_REQUESTS=y" >> .config
         echo "BR2_PACKAGE_CURL=y" >> .config
         echo "BR2_PACKAGE_OPENSSL=y" >> .config
         
-        # 3. Process configurations and build
-        make defconfig
+        # Force build system to accept changes and compile
+        make olddefconfig
         make -j$(nproc)
 
     - name: Upload Finished Firmware
