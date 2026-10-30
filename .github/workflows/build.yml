@@ -25,13 +25,16 @@ jobs:
     - name: Configure and Compile Custom OS
       run: |
         cd buildroot
-        make qemu_arm_vexpress_defconfig
+        # Switched to a reliable standard reference target configuration
+        make qemu_arm_versatile_defconfig
         
+        # Safely inject package options
         echo "BR2_PACKAGE_PYTHON3=y" >> .config
         echo "BR2_PACKAGE_PYTHON_REQUESTS=y" >> .config
         echo "BR2_PACKAGE_CURL=y" >> .config
         echo "BR2_PACKAGE_OPENSSL=y" >> .config
         
+        # Re-verify and resolve missing defaults
         make olddefconfig
         make -j$(nproc)
 
