@@ -25,16 +25,18 @@ jobs:
     - name: Configure and Compile Custom OS
       run: |
         cd buildroot
-        # Switched to a reliable standard reference target configuration
+        # Initialize default architecture target configuration
         make qemu_arm_versatile_defconfig
         
-        # Safely inject package options
-        echo "BR2_PACKAGE_PYTHON3=y" >> .config
-        echo "BR2_PACKAGE_PYTHON_REQUESTS=y" >> .config
-        echo "BR2_PACKAGE_CURL=y" >> .config
-        echo "BR2_PACKAGE_OPENSSL=y" >> .config
+        # Safely enable Python and necessary networking features using Buildroot configuration utilities
+        ./support/kconfig/merge_config.sh -m .config <(echo "
+        BR2_PACKAGE_PYTHON3=y
+        BR2_PACKAGE_PYTHON_REQUESTS=y
+        BR2_PACKAGE_CURL=y
+        BR2_PACKAGE_OPENSSL=y
+        ")
         
-        # Re-verify and resolve missing defaults
+        # Re-verify and resolve missing defaults cleanly
         make olddefconfig
         make -j$(nproc)
 
